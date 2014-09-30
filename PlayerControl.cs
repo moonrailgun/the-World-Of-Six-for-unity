@@ -3,6 +3,7 @@ using System.Collections;
 
 public enum CharacterState
 {
+	IDLE,
 	WALK,
 	RUN,
 	FIGHT
@@ -15,6 +16,7 @@ public enum CharacterMove
 
 public class PlayerControl : MonoBehaviour {
 	private float speed;
+	private float walk_speed;
 	private float back_speed;
 	private float rotate_speed;
 	private float jump_height;
@@ -29,6 +31,7 @@ public class PlayerControl : MonoBehaviour {
 
 	void Awake (){
 		speed = PlayerConfiguration.SPEED;
+		walk_speed = PlayerConfiguration.WALK_SPEED;
 		back_speed = PlayerConfiguration.BACK_SPEED;
 		rotate_speed = PlayerConfiguration.ROTATE_SPEED;
 		jump_height = PlayerConfiguration.JUMP_HEIGHT;
@@ -61,7 +64,14 @@ public class PlayerControl : MonoBehaviour {
 			// move direction directly from axes
 			moveDirection = new Vector3(0, 0, v);
 			moveDirection = transform.TransformDirection(moveDirection);
-			moveDirection *= speed;
+			if(characterState == CharacterState.RUN)
+			{
+				moveDirection *= speed;
+			}
+			else if(characterState == CharacterState.WALK)
+			{
+				moveDirection *= walk_speed;
+			}
 
 			if (Input.GetButton ("Jump")) {
 				moveDirection.y = jump_height;
@@ -83,6 +93,17 @@ public class PlayerControl : MonoBehaviour {
 		else if(v > 0.1 || v < -0.1 || h > 0.1 || h < -0.1)
 		{
 			//move
+			ChangeStateTo(CharacterState.RUN);
+
+			if(Input.GetKeyDown(KeyCode.LeftShift)||Input.GetKey(KeyCode.LeftShift))
+			{
+				ChangeStateTo(CharacterState.WALK);
+			}
+			if(Input.GetKeyUp(KeyCode.LeftShift))
+			{
+				ChangeStateTo(CharacterState.RUN);
+			}
+
 			if(h > 0.1 || h < -0.1)
 			{
 				//is rotate
@@ -138,6 +159,7 @@ public class PlayerControl : MonoBehaviour {
 		else
 		{
 			//idle
+			ChangeStateTo(CharacterState.IDLE);
 			character.animation.CrossFade("Idle");
 		}
 	}
