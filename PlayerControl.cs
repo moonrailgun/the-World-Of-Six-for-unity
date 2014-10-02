@@ -16,6 +16,7 @@ public enum CharacterMove
 
 public class PlayerControl : MonoBehaviour {
 	private float speed;
+	private float fight_speed;
 	private float walk_speed;
 	private float back_speed;
 	private float rotate_speed;
@@ -28,9 +29,13 @@ public class PlayerControl : MonoBehaviour {
 	private CharacterState characterState;
 	private CharacterMove characterMove;
 	private CharacterController controller;
+	private bool AnimationFlag = false;
+	private float fightModeCD = PlayerConfiguration.FIGHT_MODE_CD;
+	private float animationTime;
 
 	void Awake (){
 		speed = PlayerConfiguration.SPEED;
+		fight_speed = PlayerConfiguration.FIGHT_SPEED;
 		walk_speed = PlayerConfiguration.WALK_SPEED;
 		back_speed = PlayerConfiguration.BACK_SPEED;
 		rotate_speed = PlayerConfiguration.ROTATE_SPEED;
@@ -54,37 +59,24 @@ public class PlayerControl : MonoBehaviour {
 		bool jump = (Input.GetAxis("Jump") == 1.0f);
 		bool isRotate = false;
 
-		//camera trends track
-		mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, playerCamera.transform.position, Time.deltaTime * smooth);
-		mainCamera.transform.forward = Vector3.Lerp(mainCamera.transform.forward, playerCamera.transform.forward, Time.deltaTime * smooth);
+		CameraTrendsTrack();
+		FightModeCD();
+		AnimationFlagHandle();
 
-		//character move
-		if (controller.isGrounded) {
-			// We are grounded, so recalculate
-			// move direction directly from axes
-			moveDirection = new Vector3(0, 0, v);
-			moveDirection = transform.TransformDirection(moveDirection);
-			if(characterState == CharacterState.RUN)
-			{
-				moveDirection *= speed;
-			}
-			else if(characterState == CharacterState.WALK)
-			{
-				moveDirection *= walk_speed;
-			}
+		Debug.Log(characterState);
 
-			if (Input.GetButton ("Jump")) {
-				moveDirection.y = jump_height;
-			}
-		}
-		moveDirection.y -= gravity * Time.deltaTime; // Apply gravity
-		controller.Move(moveDirection * Time.deltaTime);// Move the controller
+		MoveControl(v);
 
-		//animation
+		#region animations and rotates
+		if(AnimationFlag) {return;}//don't receive any handle if a complete need to play
+
 		if(fire1 || fire2)
 		{
 			//attack
-
+			if(fire1)
+				Attack();
+			else if(fire2)
+				WeightAttack();
 		}
 		else if(jump)
 		{
@@ -93,15 +85,16 @@ public class PlayerControl : MonoBehaviour {
 		else if(v > 0.1 || v < -0.1 || h > 0.1 || h < -0.1)
 		{
 			//move
-			ChangeStateTo(CharacterState.RUN);
-
-			if(Input.GetKeyDown(KeyCode.LeftShift)||Input.GetKey(KeyCode.LeftShift))
+			if(characterState != CharacterState.FIGHT)
 			{
-				ChangeStateTo(CharacterState.WALK);
-			}
-			if(Input.GetKeyUp(KeyCode.LeftShift))
-			{
-				ChangeStateTo(CharacterState.RUN);
+				if(Input.GetKeyDown(KeyCode.LeftShift)||Input.GetKey(KeyCode.LeftShift))
+				{
+					ChangeStateTo(CharacterState.WALK);
+				}
+				else
+				{
+					ChangeStateTo(CharacterState.RUN);
+				}
 			}
 
 			if(h > 0.1 || h < -0.1)
@@ -159,13 +152,125 @@ public class PlayerControl : MonoBehaviour {
 		else
 		{
 			//idle
-			ChangeStateTo(CharacterState.IDLE);
-			character.animation.CrossFade("Idle");
+			if(characterState == CharacterState.FIGHT)
+			{
+				character.animation.CrossFade("AttackStandy");
+			}
+			else
+			{
+				ChangeStateTo(CharacterState.IDLE);
+				character.animation.CrossFade("Idle");
+			}
+		}
+		#endregion
+	}
+
+	private void ChangeStateTo(CharacterState state)
+	{
+		characterState = state;
+	}
+
+	private void CameraTrendsTrack()
+	{
+		mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, playerCamera.transform.position, Time.deltaTime * smooth);
+		mainCamera.transform.forward = Vector3.Lerp(mainCamera.transform.forward, playerCamera.transform.forward, Time.deltaTime * smooth);
+	}
+
+	private void Attack()
+	{
+		ChangeStateTo(CharacterState.FIGHT);
+		if(!character.animation.IsPlaying("Attack"))
+		{
+			PlayCompleteAnimation("Attack");
 		}
 	}
 
-	public void ChangeStateTo(CharacterState state)
+	private void WeightAttack()
 	{
-		characterState = state;
+		ChangeStateTo(CharacterState.FIGHT);
+		if(!character.animation.IsPlaying("Attack00"))
+		{
+			PlayCompleteAnimation("Attack00");
+		}
+	}
+
+	private void FightModeCD()
+	{
+		if(characterState != CharacterState.FIGHT) {return;}
+
+		fightModeCD -= Time.deltaTime;
+		if(fightModeCD <= 0)
+		{
+			ChangeStateTo(CharacterState.RUN);
+			fightModeCD = PlayerConfiguration.FIGHT_MODE_CD;
+		}
+	}
+
+	private void MoveControl(float v)
+	{
+		//can't move character when attack
+		if(AnimationFlag) 
+		{return;}
+
+		//character move
+		if (controller.isGrounded) {
+			// We are grounded, so recalculate
+			// move direction directly from axes
+			moveDirection = new Vector3(0, 0, v);
+			moveDirection = transform.TransformDirection(moveDirection);
+			if(v >= 0)
+			{
+				switch(characterState)
+				{
+				case CharacterState.RUN : moveDirection *= speed;break;
+				case CharacterState.FIGHT : moveDirection *= fight_speed;break;
+				case CharacterState.WALK : moveDirection *= walk_speed;break;
+				default : moveDirection *= speed;break;
+				}
+			}
+			else
+			{
+				moveDirection *= back_speed;
+			}
+
+			if (Input.GetButton ("Jump")) {
+				moveDirection.y = jump_height;
+
+				if(characterState == CharacterState.IDLE)
+				{
+					PlayCompleteAnimation("Jump_NoBlade");
+					return;
+				}
+				else if(characterState == CharacterState.FIGHT)
+				{
+					PlayCompleteAnimation("jump");
+					return;
+				}
+			}
+		}
+
+		moveDirection.y -= gravity * Time.deltaTime; // Apply gravity
+		//Debug.Log(moveDirection.z);
+		controller.Move(moveDirection * Time.deltaTime);// Move the controller
+	}
+
+	private void AnimationFlagHandle()
+	{
+		if(AnimationFlag)
+		{
+			animationTime -= Time.deltaTime;
+			if(animationTime <= 0){AnimationFlag = false;}
+		}
+	}
+
+	private void PlayCompleteAnimation(string name,int mode = 1)
+	{
+		AnimationFlag = true;
+		character.animation.CrossFade(name);
+		switch(mode)
+		{
+		case 1 : animationTime = character.animation.GetClip(name).length - PlayerConfiguration.COMPLETE_ANIMATION_SURPLUS;break;
+		default : animationTime = character.animation.GetClip(name).length;break;
+		}
 	}
 }

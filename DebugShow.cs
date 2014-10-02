@@ -38,16 +38,11 @@ public class DebugShow : MonoBehaviour {
 		{
 			float k = (float)i/smooth;
 			slerpPoint[i] = Vector3.Slerp(leftEnd, rightEnd,k).normalized;
-			Debug.Log(slerpPoint[i].x+","+slerpPoint[i].y+","+slerpPoint[i].z);
 		}
 
 		for(int i=0;i<smooth;i++)
 		{
 			Debug.DrawLine(transform.TransformDirection(slerpPoint[i] * length) + playerPoint,transform.TransformDirection(slerpPoint[i+1] * length) + playerPoint, Color.grey);
-			if(i == smooth- 1)
-			{
-				Debug.Log("create once over!");
-			}
 		}
 	}
 }

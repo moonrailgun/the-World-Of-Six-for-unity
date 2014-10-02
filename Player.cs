@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class Player : MonoBehaviour , IPlayer {
-	string name;
+	string PlayerName;
 	Sex sex;
 	int level;
 	int exp;
