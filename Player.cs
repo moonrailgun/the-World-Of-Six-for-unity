@@ -20,17 +20,21 @@ public class Player : MonoBehaviour , IPlayer {
 	//IEnumerator skill;
 
 	// Use this for initialization
+	void Awake() {
+		Init();
+	}
+
 	void Start () {
 	
 	}
 	
 	// Update is called once per frame
 	void Update () {
-	
+
 	}
 
 	public void Init(){
-		name = "";
+		PlayerName = "";
 		sex = Sex.Female;
 		level = 1;
 		exp = 0;
@@ -45,7 +49,7 @@ public class Player : MonoBehaviour , IPlayer {
 		skillPoint = 0;
 	}
 	public void SetName(string name){
-		this.name = name;
+		this.PlayerName = name;
 	}
 	public void SetSex(Sex sex){
 		this.sex = sex;
