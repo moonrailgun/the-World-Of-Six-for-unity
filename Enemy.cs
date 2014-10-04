@@ -1,6 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public enum EnemyState 
+{
+	Idle, DiscoverPlayer, RunToPlayer, Attack
+}
+
 public class Enemy : MonoBehaviour {
 
 	GameObject player;
@@ -10,10 +15,10 @@ public class Enemy : MonoBehaviour {
 	float rotateSpeed;
 	float smooth = 5.0f;
 
-	Vector3 startPoint;
+	int directionParameter;
 
-	bool attackFlag = false;
-	bool distanceFlag = false;
+	Vector3 startPoint;
+	EnemyState state = EnemyState.Idle;
 
 	// Use this for initialization
 	void Awake () {
@@ -37,53 +42,68 @@ public class Enemy : MonoBehaviour {
 		float distance = Vector3.Distance(transform.position , player.transform.position);
 		if(distance < guardDistance)
 		{
-			/*
-			if(distance > attackDistance && !attackFlag)
+			if(distance < attackDistance && state != EnemyState.Attack)
 			{
-				//stage 1:rotate to player
-				attackFlag = RotateToPlayerWithFrames(1.0f);
-				//walk
-				transform.Translate(0, 0, moveSpeed * Time.deltaTime * 0.1f);
-			}
-			else if(distance > attackDistance && attackFlag)
-			{
-				//stage 2: run to player
-				transform.Translate(0, 0, moveSpeed * Time.deltaTime);
-			}
-			else
-			{
-				//stage 3:face to player and attack
-				transform.LookAt(player.transform.position);
-				distanceFlag = true;
+				state = EnemyState.Attack;
 			}
 
-			if(attackFlag)
+			if(distance >= attackDistance && state == EnemyState.Attack)
 			{
-				if(distanceFlag && Vector3.Distance(transform.position,player.transform.position) > attackDistance)
-				{ attackFlag=false;distanceFlag = false;}
+				state = EnemyState.RunToPlayer;
 			}
-			*/
+
+			if(state == EnemyState.Idle)
+			{
+				state = EnemyState.DiscoverPlayer;
+
+				Vector3 targetVector = player.transform.position - transform.position;
+				if(Vector3.Dot(targetVector, transform.forward) > 0)
+				{
+					directionParameter = -1;
+				}
+				else
+				{
+					directionParameter = 1;
+				}
+			}
+
+			if(state == EnemyState.DiscoverPlayer)
+			{
+				//stage 1:rotate to player
+				if(RotateToPlayerWithFrames(1.0f)) {state = EnemyState.RunToPlayer;}
+				transform.Translate(0, 0, moveSpeed * Time.deltaTime * 0.1f);
+			}
+
+			if(state == EnemyState.RunToPlayer)
+			{
+				transform.LookAt(player.transform.position);
+				transform.Translate(0, 0, moveSpeed * Time.deltaTime);
+			}
+
+			if(state == EnemyState.Attack)
+			{
+				//attack
+			}
 		}
 		else
 		{
 			transform.position = Vector3.Lerp(transform.position, startPoint, Time.deltaTime * smooth);
+
+			state = EnemyState.Idle;
 		}
 	}
 
 	private bool RotateToPlayerWithFrames(float a)
 	{
-		Vector3 targetVector = player.transform.position - transform.position;
-		float angle = Vector3.Angle(targetVector, transform.forward);
+
+		float angle = Vector3.Angle((player.transform.position - transform.position), transform.forward);
+
+		Debug.Log(angle);
 
 		if(angle > a)
 		{
-			if((player.transform.position - transform.position).x > 0){
-				transform.Rotate(0,rotateSpeed * Time.deltaTime,0,Space.Self);
-			}
-			else
-			{
-				transform.Rotate(0,-rotateSpeed * Time.deltaTime,0,Space.Self);
-			}
+			transform.Rotate(0,directionParameter * rotateSpeed * Time.deltaTime,0,Space.Self);
+
 			return false;
 		}
 		else

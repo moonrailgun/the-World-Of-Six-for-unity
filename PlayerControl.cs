@@ -63,8 +63,6 @@ public class PlayerControl : MonoBehaviour {
 		FightModeCD();
 		AnimationFlagHandle();
 
-		Debug.Log(characterState);
-
 		MoveControl(v);
 
 		#region animations and rotates
