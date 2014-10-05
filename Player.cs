@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Player : MonoBehaviour , IPlayer {
+public class Player : IPlayer {
 	string PlayerName;
 	Sex sex;
 	int level;
@@ -16,21 +16,10 @@ public class Player : MonoBehaviour , IPlayer {
 
 	int maxLife;
 	int maxEnergy;
-	
-	//IEnumerator skill;
 
-	// Use this for initialization
-	void Awake() {
+	public Player()
+	{
 		Init();
-	}
-
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-
 	}
 
 	public void Init(){
@@ -47,6 +36,18 @@ public class Player : MonoBehaviour , IPlayer {
 		wit = 10;
 		propertyPoint = 0;
 		skillPoint = 0;
+	}
+	public int GetLife(){
+		return life;
+	}
+	public int GetMaxLife(){
+		return maxLife;
+	}
+	public int GetEnergy(){
+		return energy;
+	}
+	public int GetMaxEnergy(){
+		return maxEnergy;
 	}
 	public void SetName(string name){
 		this.PlayerName = name;
@@ -88,5 +89,8 @@ public class Player : MonoBehaviour , IPlayer {
 	}
 	public void CheckLevel() {
 		//here write the rule of level
+	}
+	public void Damage(int damageValue) {
+		ModifyLife(-damageValue);
 	}
 }

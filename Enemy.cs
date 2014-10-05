@@ -14,6 +14,9 @@ public class Enemy : MonoBehaviour {
 	float moveSpeed;
 	float rotateSpeed;
 	float smooth = 5.0f;
+	float atk = 10.0f;
+	float atkCD = 2.0f;
+	float atkTime;
 
 	int directionParameter;
 
@@ -28,6 +31,7 @@ public class Enemy : MonoBehaviour {
 		rotateSpeed = PlayerConfiguration.ROTATE_SPEED;
 
 		startPoint = transform.position;
+		atkTime = 0;
 	}
 
 	void Start () {
@@ -36,7 +40,6 @@ public class Enemy : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-
 		player = GameObject.FindWithTag("Player");
 
 		float distance = Vector3.Distance(transform.position , player.transform.position);
@@ -83,6 +86,16 @@ public class Enemy : MonoBehaviour {
 			if(state == EnemyState.Attack)
 			{
 				//attack
+				if(atkTime > 0)
+				{
+					atkTime -= Time.deltaTime;
+				}
+				else
+				{
+					atkTime = atkCD;
+					Attack();
+					Debug.Log("attack");
+				}
 			}
 		}
 		else
@@ -98,8 +111,6 @@ public class Enemy : MonoBehaviour {
 
 		float angle = Vector3.Angle((player.transform.position - transform.position), transform.forward);
 
-		Debug.Log(angle);
-
 		if(angle > a)
 		{
 			transform.Rotate(0,directionParameter * rotateSpeed * Time.deltaTime,0,Space.Self);
@@ -110,5 +121,9 @@ public class Enemy : MonoBehaviour {
 		{
 			return true;
 		}
+	}
+	private void Attack() {
+		int damageValue = (int)atk;
+		GlobalObject.player.Damage(damageValue);
 	}
 }
