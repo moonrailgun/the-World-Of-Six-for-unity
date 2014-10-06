@@ -33,6 +33,8 @@ public class PlayerControl : MonoBehaviour {
 	private float fightModeCD = PlayerConfiguration.FIGHT_MODE_CD;
 	private float animationTime;
 
+	private PlayerState playerState;
+
 	void Awake (){
 		speed = PlayerConfiguration.SPEED;
 		fight_speed = PlayerConfiguration.FIGHT_SPEED;
@@ -46,12 +48,23 @@ public class PlayerControl : MonoBehaviour {
 		mainCamera = GameObject.Find("Camera");
 		characterState = CharacterState.RUN;
 		controller = GetComponent<CharacterController>();
+
+		playerState = PlayerState.Alive;
 	}
 
 	private Vector3 moveDirection = Vector3.zero;
 
 	// Update is called once per frame
 	void Update () {
+		if(GlobalObject.player.GetState() == PlayerState.Death) {
+			if(this.playerState == PlayerState.Alive)
+			{
+				this.playerState = PlayerState.Death;
+				PlayDeathAnimation();
+			}
+			return;
+		}
+
 		float v = Input.GetAxis("Vertical");
 		float h = Input.GetAxis("Horizontal");
 		bool fire1 = (Input.GetAxis("Fire1") == 1.0f);
@@ -270,5 +283,10 @@ public class PlayerControl : MonoBehaviour {
 		case 1 : animationTime = character.animation.GetClip(name).length - PlayerConfiguration.COMPLETE_ANIMATION_SURPLUS;break;
 		default : animationTime = character.animation.GetClip(name).length;break;
 		}
+	}
+
+	private void PlayDeathAnimation()
+	{
+		character.animation.CrossFade("Death");
 	}
 }

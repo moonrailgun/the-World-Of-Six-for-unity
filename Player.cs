@@ -1,11 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+
+public enum PlayerState
+{
+	Alive, Death
+}
 
 public class Player : IPlayer {
 	string PlayerName;
 	Sex sex;
 	int level;
 	int exp;
+	PlayerState state;
 	int life;
 	int energy;
 	int power;
@@ -13,6 +20,8 @@ public class Player : IPlayer {
 	int wit;
 	int propertyPoint;
 	int skillPoint;
+
+	List<Skill> skillList;
 
 	int maxLife;
 	int maxEnergy;
@@ -27,6 +36,7 @@ public class Player : IPlayer {
 		sex = Sex.Female;
 		level = 1;
 		exp = 0;
+		state = PlayerState.Alive;
 		life = 100;
 		maxLife = 100;
 		energy = 100;
@@ -92,5 +102,14 @@ public class Player : IPlayer {
 	}
 	public void Damage(int damageValue) {
 		ModifyLife(-damageValue);
+	}
+	public PlayerState GetState() {
+		return state;
+	}
+	public void Death() {
+		if (this.state == PlayerState.Alive)
+		{
+			this.state = PlayerState.Death;
+		}
 	}
 }

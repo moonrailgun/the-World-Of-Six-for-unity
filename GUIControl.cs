@@ -10,12 +10,15 @@ public class GUIControl : MonoBehaviour {
 
 	private Rect lifeBar = new Rect(50, 10, Screen.width / 2, 20);
 	private Rect energyBar = new Rect(50, 40, Screen.width / 2, 20);
+	private Rect deathWindowRect;
 
 	void Awake () {
 		life = GlobalObject.player.GetLife();
 		maxLife = GlobalObject.player.GetMaxLife();
 		energy = GlobalObject.player.GetEnergy();
 		maxEnergy = GlobalObject.player.GetMaxEnergy();
+
+		deathWindowRect = new Rect(Screen.width/2 - 300, Screen.height/2 - 200, 600, 400);
 	}
 
 	void Start () {
@@ -24,8 +27,6 @@ public class GUIControl : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		UpdateData();
-
 		float lifeRatio = (float)life/maxLife;
 		lifeBar.width = Screen.width/2 * lifeRatio;
 
@@ -34,6 +35,9 @@ public class GUIControl : MonoBehaviour {
 	}
 
 	void OnGUI () {
+		UpdateData();
+
+		GUI.color = Color.white;
 		//GUI.Box(new Rect(0,0,Screen.width,Screen.height),"This is a title");
 		GUI.Label(new Rect(10,10,40,20),"生命值");
 		GUI.Label(new Rect(10,40,40,20),"能量值");
@@ -49,7 +53,23 @@ public class GUIControl : MonoBehaviour {
 
 		if(life <= 0)
 		{
-			Debug.Log("Death!!!!");
+			if(GlobalObject.player.GetState() == PlayerState.Alive)
+			{
+				GlobalObject.player.Death();
+			}
+
+			GUI.color = Color.red;
+			GUI.Window(5,deathWindowRect,DeathWindow,"你已经死亡");
+		}
+	}
+
+	void DeathWindow(int windowID)
+	{
+		GUI.color = Color.red;
+		if(GUI.Button(new Rect(deathWindowRect.width/2 - 100,deathWindowRect.height/2 - 50, 200, 100),"Restart"))
+		{
+			GlobalObject.player.Init();//data restart
+			Application.LoadLevel(Application.loadedLevelName);
 		}
 	}
 }
