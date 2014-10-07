@@ -9,6 +9,7 @@ public enum EnemyState
 public class Enemy : MonoBehaviour {
 
 	GameObject player;
+	string enemyName = "evil cube";
 	float guardDistance;
 	float attackDistance;
 	float moveSpeed;
@@ -125,5 +126,8 @@ public class Enemy : MonoBehaviour {
 	private void Attack() {
 		int damageValue = (int)atk;
 		GlobalObject.player.Damage(damageValue);
+	}
+	public string GetEnemyName() {
+		return this.enemyName;
 	}
 }

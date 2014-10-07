@@ -12,6 +12,8 @@ public class GUIControl : MonoBehaviour {
 	private Rect energyBar = new Rect(50, 40, Screen.width / 2, 20);
 	private Rect deathWindowRect;
 
+	private PlayerControl playerControl;
+
 	void Awake () {
 		life = GlobalObject.player.GetLife();
 		maxLife = GlobalObject.player.GetMaxLife();
@@ -19,6 +21,8 @@ public class GUIControl : MonoBehaviour {
 		maxEnergy = GlobalObject.player.GetMaxEnergy();
 
 		deathWindowRect = new Rect(Screen.width/2 - 300, Screen.height/2 - 200, 600, 400);
+
+		playerControl = GameObject.Find("Player").GetComponent<PlayerControl>();
 	}
 
 	void Start () {
@@ -32,7 +36,14 @@ public class GUIControl : MonoBehaviour {
 
 		float energyRatio = (float)energy/maxEnergy;
 		energyBar.width = Screen.width/2 * energyRatio;
+
+		if(Input.GetKeyDown(KeyCode.Tab))
+		{
+			i++;
+		}
 	}
+
+	private int i = -1;
 
 	void OnGUI () {
 		UpdateData();
@@ -42,8 +53,19 @@ public class GUIControl : MonoBehaviour {
 		GUI.Label(new Rect(10,10,40,20),"生命值");
 		GUI.Label(new Rect(10,40,40,20),"能量值");
 
-		GUI.Box(lifeBar,life + " / " + maxLife);
-		GUI.Box(energyBar,energy + " / " + maxEnergy);
+		GUI.Box(lifeBar,"");
+		GUI.Box(energyBar,"");
+		GUI.Box(new Rect(50, 10, Screen.width / 2, 20),life + " / " + maxLife);
+		GUI.Box(new Rect(50, 40, Screen.width / 2, 20),energy + " / " + maxEnergy);
+
+		if(i >= 0 )
+		{
+			if(i >= playerControl.enemyList.Length) {i = 0;}
+			GameObject enemy = playerControl.enemyList[i];
+			string enemyName = enemy.GetComponent<Enemy>().GetEnemyName();
+
+			GUI.Box(new Rect(Screen.width/2 - 50, 10, 100, 20),enemyName);
+		}
 	}
 
 	void UpdateData()

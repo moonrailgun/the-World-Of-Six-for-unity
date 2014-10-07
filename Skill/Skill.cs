@@ -8,6 +8,8 @@ public enum SkillType
 public abstract class Skill{
 	public string skillName;
 	public SkillType type;
+	public int level;
+	public string description;
 
 	public Skill(string skillName, SkillType type)
 	{

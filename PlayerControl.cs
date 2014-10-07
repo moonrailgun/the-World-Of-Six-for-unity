@@ -32,6 +32,7 @@ public class PlayerControl : MonoBehaviour {
 	private bool AnimationFlag = false;
 	private float fightModeCD = PlayerConfiguration.FIGHT_MODE_CD;
 	private float animationTime;
+	public GameObject[] enemyList;
 
 	private PlayerState playerState;
 
@@ -64,6 +65,8 @@ public class PlayerControl : MonoBehaviour {
 			}
 			return;
 		}
+
+		GetAllEnemy();
 
 		float v = Input.GetAxis("Vertical");
 		float h = Input.GetAxis("Horizontal");
@@ -288,5 +291,10 @@ public class PlayerControl : MonoBehaviour {
 	private void PlayDeathAnimation()
 	{
 		character.animation.CrossFade("Death");
+	}
+
+	private void GetAllEnemy()
+	{
+		enemyList = GameObject.FindGameObjectsWithTag("Enemy");
 	}
 }
