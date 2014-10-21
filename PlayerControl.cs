@@ -1,18 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
-
-public enum CharacterState
-{
-	IDLE,
-	WALK,
-	RUN,
-	FIGHT
-}
-
 public enum CharacterMove
 {
 	TRUE,FALSE
 }
+//*********************************
+//该脚本已经弃用
+//*********************************
 
 public class PlayerControl : MonoBehaviour {
 	private float speed;
@@ -36,6 +30,12 @@ public class PlayerControl : MonoBehaviour {
 
 	private PlayerState playerState;
 
+	//debug use
+	void OnGUI () {
+
+	}
+
+
 	void Awake (){
 		speed = PlayerConfiguration.SPEED;
 		fight_speed = PlayerConfiguration.FIGHT_SPEED;
@@ -46,7 +46,7 @@ public class PlayerControl : MonoBehaviour {
 		gravity = PlayerConfiguration.GRAVITY;
 		character = GameObject.Find("Player/Character");
 		playerCamera = GameObject.Find("Player/PlayerCamera");
-		mainCamera = GameObject.Find("Camera");
+		mainCamera = GameObject.Find("Main Camera");
 		characterState = CharacterState.RUN;
 		controller = GetComponent<CharacterController>();
 
@@ -86,11 +86,13 @@ public class PlayerControl : MonoBehaviour {
 
 		if(fire1 || fire2)
 		{
+			/*
 			//attack
 			if(fire1)
 				Attack();
 			else if(fire2)
 				WeightAttack();
+			*/
 		}
 		else if(jump)
 		{

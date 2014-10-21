@@ -7,12 +7,21 @@ public enum PlayerState
 	Alive, Death
 }
 
+public enum CharacterState
+{
+	IDLE,
+	WALK,
+	RUN,
+	FIGHT
+}
+
 public class Player : IPlayer {
 	string PlayerName;
 	Sex sex;
 	int level;
 	int exp;
 	PlayerState state;
+	CharacterState animationState;
 	int life;
 	int energy;
 	int power;
@@ -37,6 +46,7 @@ public class Player : IPlayer {
 		level = 1;
 		exp = 0;
 		state = PlayerState.Alive;
+		animationState = CharacterState.IDLE;
 		life = 100;
 		maxLife = 100;
 		energy = 100;
@@ -111,5 +121,11 @@ public class Player : IPlayer {
 		{
 			this.state = PlayerState.Death;
 		}
+	}
+	public CharacterState GetAnimationState () {
+		return animationState;
+	}
+	public void SetAnimationState (CharacterState state) {
+		animationState = state;
 	}
 }

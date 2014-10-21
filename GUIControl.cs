@@ -39,7 +39,7 @@ public class GUIControl : MonoBehaviour {
 
 		if(Input.GetKeyDown(KeyCode.Tab))
 		{
-			i++;
+			ToggleShowedEnemy();
 		}
 	}
 
@@ -93,5 +93,9 @@ public class GUIControl : MonoBehaviour {
 			GlobalObject.player.Init();//data restart
 			Application.LoadLevel(Application.loadedLevelName);
 		}
+	}
+
+	void ToggleShowedEnemy () {
+		i++;
 	}
 }
