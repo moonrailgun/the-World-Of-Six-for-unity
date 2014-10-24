@@ -14,6 +14,11 @@ public class Login : MonoBehaviour {
 			GlobalObject.account.Password = Password;
 
 			Debug.Log("登陆成功\n账户:"+GlobalObject.account.Username +"密码:"+GlobalObject.account.Password);
+
+			Application.LoadLevel("Test");
+		}
+		else{
+			Debug.Log("Press Input any word in two field");
 		}
 	}
 }
